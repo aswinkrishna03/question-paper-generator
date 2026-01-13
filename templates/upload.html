@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>AI Question Paper Generator</title>
+</head>
+<body>
+
+    <h2>AI-Based Question Paper Generator</h2>
+
+    <!-- IMPORTANT: action="/" and enctype are REQUIRED -->
+    <form action="/" method="post" enctype="multipart/form-data">
+
+        <label>Select Syllabus PDF:</label><br><br>
+
+        <input type="file" name="pdf" accept=".pdf" required>
+        <br><br>
+
+        <button type="submit">Generate Question Paper</button>
+    </form>
+
+    <hr>
+
+    <p>
+        Upload a <strong>text-based syllabus PDF</strong>.  
+        The system will analyze the syllabus and automatically generate a question paper.
+    </p>
+
+</body>
+</html>
