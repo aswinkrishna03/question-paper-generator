@@ -14,19 +14,21 @@ app = Flask(__name__)
 UPLOAD_FOLDER = "uploads"
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
+
 @app.route("/", methods=["GET", "POST"])
 def upload_pdf():
     if request.method == "POST":
 
-        # 1. Clear old questions
+        # 🔁 Clear old questions
         clear_questions()
+        seen_topics = set()
 
-        # 2. Save uploaded PDF
+        # 📥 Save uploaded PDF
         pdf_file = request.files["pdf"]
         file_path = os.path.join(UPLOAD_FOLDER, pdf_file.filename)
         pdf_file.save(file_path)
 
-        # 3. Extract text from PDF
+        # 📄 Extract text from PDF
         reader = PdfReader(file_path)
         text = ""
 
@@ -35,18 +37,13 @@ def upload_pdf():
             if extracted:
                 text += extracted + "\n"
 
-        print("PDF TEXT SAMPLE:")
-        print(text[:500])
-
-        # 4. Clean text (light cleaning only)
+        # 🧹 Clean extracted text
         text = text.replace("\n", " ")
-        text = re.sub(r"Module\s*-?\s*\d+", " ", text, flags=re.IGNORECASE)
-        text = re.sub(r"Module\d+", " ", text, flags=re.IGNORECASE)
         text = re.sub(r"[■•–]", " ", text)
         text = re.sub(r"\([^)]*\)", " ", text)
         text = re.sub(r"\s+", " ", text).strip()
 
-        # 5. Split into topic lines
+        # ✂ Split into sentences
         lines = re.split(r"[.:]", text)
 
         count = 0
@@ -56,55 +53,90 @@ def upload_pdf():
             if len(line) < 6:
                 continue
 
-            # 6. Split compound topics
             topics = re.split(r"-| and |,", line)
 
             for topic in topics:
                 topic = topic.strip()
+                topic_lower = topic.lower()
+
+                # ==============================
+                # 🚫 FILTER UNWANTED TEXT
+                # ==============================
+
                 if len(topic) < 6:
                     continue
 
-                topic_lower = topic.lower()
+                # Course codes (MCN201, etc.)
+                if re.search(r"[A-Z]{3,}\d{2,}", topic):
+                    continue
 
-                # Normalize common concepts
+                # Full uppercase headings
+                if topic.isupper():
+                    continue
+
+                # Instructional / prompt leakage
+                instruction_phrases = [
+                    "generate a question",
+                    "from this text",
+                    "its sources",
+                    "its uses",
+                    "its applications",
+                    "explain the following"
+                ]
+                if any(p in topic_lower for p in instruction_phrases):
+                    continue
+
+                # Repeated page headers
+                if "sun is the primary source" in topic_lower:
+                    continue
+
+                # Duplicate topic protection
+                if topic_lower in seen_topics:
+                    continue
+                seen_topics.add(topic_lower)
+
+                # Repeated-word noise
+                words = topic.split()
+                if len(words) > 3 and len(set(words)) < len(words) / 2:
+                    continue
+
+                # Meaningless generic words
+                if topic_lower in ["resources", "engineering", "syllabus"]:
+                    continue
+
+                # ==============================
+                # NORMALIZE COMMON TERMS
+                # ==============================
                 if "dma" in topic_lower:
                     topic = "DMA transfer"
                 elif "control bus" in topic_lower:
                     topic = "Control bus"
 
-                # 7. Generate question
+                # ==============================
+                # GENERATE QUESTION
+                # ==============================
                 q_type = classify_sentence(topic)
                 question = generate_question(topic, q_type)
 
-                if q_type == "definition":
-                    marks = 2
-                elif q_type == "comparison":
-                    marks = 5
-                elif q_type == "analysis":
-                    marks = 10
-                else:
-                    marks = 5
-
+                marks = 2 if q_type == "definition" else 5
                 insert_question(question, q_type, marks)
-                count += 1
 
+                count += 1
                 if count >= 10:
                     break
 
             if count >= 10:
                 break
 
-        # 8. Generate question paper PDF
+        # 📑 Generate Question Paper & PDF
         paper = generate_question_paper()
-        generate_pdf(paper)
+        filepath = generate_pdf(paper)
 
-        return "Question Paper Generated Successfully. Check Question_Paper.pdf"
+        return f"Question Paper Generated Successfully: {filepath}"
 
     return render_template("upload.html")
 
 
-print("APP FILE LOADED")
-
 if __name__ == "__main__":
-    print("STARTING FLASK SERVER")
+    print("Starting Flask server...")
     app.run(debug=True)

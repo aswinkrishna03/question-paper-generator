@@ -1,19 +1,26 @@
 from reportlab.lib.pagesizes import A4
 from reportlab.pdfgen import canvas
+import time
+import os
 
-def generate_pdf(questions):
-    pdf = canvas.Canvas("Question_Paper.pdf", pagesize=A4)
+def generate_pdf(paper):
+    output_dir = "generated_papers"
+    os.makedirs(output_dir, exist_ok=True)
+
+    filename = f"Question_Paper_{int(time.time())}.pdf"
+    filepath = os.path.join(output_dir, filename)
+
+    c = canvas.Canvas(filepath, pagesize=A4)
     width, height = A4
+    y = height - 50
 
-    text = pdf.beginText(50, height - 50)
-    text.setFont("Helvetica-Bold", 14)
-    text.textLine("AUTOMATIC QUESTION PAPER")
-    text.textLine("")
+    for line in paper:
+        c.drawString(50, y, line)
+        y -= 20
 
-    text.setFont("Helvetica", 12)
-    for i, q in enumerate(questions, 1):
-        text.textLine(f"{i}. {q}")
-        text.textLine("")
+        if y < 50:
+            c.showPage()
+            y = height - 50
 
-    pdf.drawText(text)
-    pdf.save()
+    c.save()
+    return filepath

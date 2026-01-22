@@ -3,13 +3,12 @@ from database import fetch_questions
 def generate_question_paper():
     questions = fetch_questions()
 
-    paper = "AUTOMATIC QUESTION PAPER\n\n"
+    paper = []
+    paper.append("AUTOMATIC QUESTION PAPER\n")
 
-    if not questions:
-        paper += "No questions generated.\n"
-        return paper
-
-    for i, q in enumerate(questions, start=1):
-        paper += f"{i}. {q[0]}\n"
+    qno = 1
+    for q in questions:
+        paper.append(f"{qno}. {q[0]}")
+        qno += 1
 
     return paper
