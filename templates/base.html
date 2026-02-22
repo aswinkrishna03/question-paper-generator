@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Question Paper Generator</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+
+<header class="navbar">
+    <div class="nav-container">
+        <h2>AI Question Paper Generator</h2>
+
+        <nav>
+            {% if session.get("username") %}
+                <span style="margin-right:15px;">
+                    Welcome, <strong>{{ session.get("username") }}</strong>
+                </span>
+
+                <a href="{{ url_for('upload_pdf') }}">Home</a>
+                <a href="{{ url_for('history') }}" style="margin-left:15px;">History</a>
+                <a href="{{ url_for('logout') }}" style="margin-left:15px;">Logout</a>
+
+            {% else %}
+                <a href="{{ url_for('login') }}">Login</a>
+                <a href="{{ url_for('register') }}" style="margin-left:15px;">Register</a>
+            {% endif %}
+        </nav>
+    </div>
+</header>
+
+<main class="main-content">
+    {% block content %}{% endblock %}
+</main>
+
+<footer class="footer">
+    <p>© 2026 AI Question Paper Generator | Built with Flask</p>
+</footer>
+
+</body>
+</html>
