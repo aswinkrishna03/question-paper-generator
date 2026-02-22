@@ -20,6 +20,7 @@ from pdf_generator import generate_pdf
 app = Flask(__name__)
 app.secret_key = "super_secret_key_change_this"
 
+# Initialize database
 init_db()
 
 UPLOAD_FOLDER = "uploads"
@@ -75,7 +76,7 @@ def logout():
 
 
 # ===============================
-# MAIN UPLOAD PAGE (PROTECTED)
+# MAIN PAGE (PROTECTED)
 # ===============================
 @app.route("/", methods=["GET", "POST"])
 def upload_pdf():
@@ -104,6 +105,7 @@ def upload_pdf():
             if extracted:
                 text += extracted + "\n"
 
+        # Clean text
         text = text.replace("\n", " ")
         text = re.sub(r"[■•–]", " ", text)
         text = re.sub(r"\([^)]*\)", " ", text)
@@ -152,12 +154,12 @@ def upload_pdf():
             if count >= 10:
                 break
 
+        # Generate paper
         paper = generate_question_paper()
         filepath = generate_pdf(paper)
-
         filename = os.path.basename(filepath)
 
-        # SAVE PAPER TO USER HISTORY
+        # Save history
         save_paper(session["user_id"], filename)
 
         return redirect(url_for("result", file=filename))
@@ -190,7 +192,7 @@ def download_file(filename):
 
 
 # ===============================
-# HISTORY PAGE
+# HISTORY
 # ===============================
 @app.route("/history")
 def history():
@@ -201,6 +203,9 @@ def history():
     return render_template("history.html", papers=papers)
 
 
+# ===============================
+# RUN SERVER (RENDER READY)
+# ===============================
 if __name__ == "__main__":
-    print("Starting Flask server...")
-    app.run(debug=True)
+    port = int(os.environ.get("PORT", 7860))
+    app.run(host="0.0.0.0", port=port)
