@@ -1,0 +1,260 @@
+:root {
+  --page-bg: #f3f6fb;
+  --surface: #ffffff;
+  --surface-muted: #f8faff;
+  --text: #132033;
+  --text-muted: #46566b;
+  --primary: #1d4ed8;
+  --primary-hover: #1e40af;
+  --border: #d6dfec;
+  --ring: rgba(29, 78, 216, 0.35);
+  --shadow: 0 12px 32px rgba(16, 24, 40, 0.08);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+}
+
+body.page {
+  min-height: 100vh;
+  font-family: Arial, Helvetica, sans-serif;
+  line-height: 1.5;
+  color: var(--text);
+  background: linear-gradient(180deg, #eef3ff 0%, var(--page-bg) 18%, var(--page-bg) 100%);
+}
+
+.page__skip-link {
+  position: absolute;
+  top: -3rem;
+  left: 0.75rem;
+  z-index: 1000;
+  border-radius: 0.35rem;
+  padding: 0.55rem 0.75rem;
+  font-weight: 700;
+  text-decoration: none;
+  background: var(--primary);
+  color: #fff;
+}
+
+.page__skip-link:focus {
+  top: 0.75rem;
+}
+
+.site-header {
+  position: sticky;
+  top: 0;
+  z-index: 900;
+  border-bottom: 1px solid var(--border);
+  background: rgba(255, 255, 255, 0.92);
+  backdrop-filter: blur(6px);
+}
+
+.site-header__container {
+  position: relative;
+  width: min(1100px, 92%);
+  margin: 0 auto;
+  min-height: 4.25rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.site-header__brand {
+  font-size: clamp(1rem, 1.5vw, 1.15rem);
+  font-weight: 700;
+  text-decoration: none;
+  color: var(--text);
+}
+
+.site-header__menu-toggle {
+  display: none;
+  border: 1px solid var(--border);
+  border-radius: 0.5rem;
+  background: #fff;
+  padding: 0.38rem;
+  cursor: pointer;
+}
+
+.site-header__menu-icon {
+  display: block;
+  width: 1.4rem;
+  height: 2px;
+  margin: 0.26rem;
+  background: var(--text);
+}
+
+.site-header__nav {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+}
+
+.site-header__nav-link {
+  display: inline-block;
+  border-radius: 0.4rem;
+  padding: 0.45rem 0.65rem;
+  text-decoration: none;
+  color: var(--text-muted);
+  font-weight: 600;
+}
+
+.site-header__nav-link:hover,
+.site-header__nav-link:focus-visible {
+  color: var(--primary);
+  background: rgba(29, 78, 216, 0.1);
+}
+
+.dashboard {
+  width: min(1100px, 92%);
+  margin: 1.8rem auto 2rem;
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 1rem;
+}
+
+.dashboard__panel {
+  border: 1px solid var(--border);
+  border-radius: 0.95rem;
+  background: var(--surface);
+  padding: clamp(1rem, 2.2vw, 1.55rem);
+  box-shadow: var(--shadow);
+}
+
+.dashboard__panel--muted {
+  background: var(--surface-muted);
+}
+
+.dashboard__panel-header {
+  margin-bottom: 1rem;
+}
+
+.dashboard__title {
+  margin: 0;
+  font-size: clamp(1.3rem, 2.4vw, 1.9rem);
+  line-height: 1.25;
+}
+
+.dashboard__intro {
+  margin: 0.7rem 0 0;
+  color: var(--text-muted);
+  max-width: 68ch;
+}
+
+.dashboard__subtitle {
+  margin: 0 0 0.7rem;
+  font-size: 1.12rem;
+}
+
+.dashboard__steps,
+.dashboard__tips {
+  margin: 0;
+  padding-left: 1.25rem;
+}
+
+.dashboard__step,
+.dashboard__tip {
+  color: var(--text-muted);
+}
+
+.dashboard__step + .dashboard__step,
+.dashboard__tip + .dashboard__tip {
+  margin-top: 0.55rem;
+}
+
+.upload-form {
+  display: grid;
+  gap: 1rem;
+}
+
+.upload-form__field {
+  display: grid;
+  gap: 0.45rem;
+}
+
+.upload-form__label {
+  font-weight: 700;
+}
+
+.upload-form__input {
+  width: 100%;
+  border: 1px solid var(--border);
+  border-radius: 0.55rem;
+  padding: 0.62rem;
+  background: #fff;
+}
+
+.upload-form__help {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 0.92rem;
+}
+
+.upload-form__button {
+  border: none;
+  border-radius: 0.55rem;
+  padding: 0.78rem 1rem;
+  width: fit-content;
+  background: var(--primary);
+  color: #fff;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.upload-form__button:hover,
+.upload-form__button:focus-visible {
+  background: var(--primary-hover);
+}
+
+:focus-visible {
+  outline: 3px solid var(--ring);
+  outline-offset: 2px;
+}
+
+@media (max-width: 900px) {
+  .dashboard {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 768px) {
+  .site-header__menu-toggle {
+    display: inline-block;
+  }
+
+  .site-header__nav {
+    position: absolute;
+    top: calc(100% + 0.35rem);
+    left: 0;
+    right: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.35rem;
+    border: 1px solid var(--border);
+    border-radius: 0.7rem;
+    background: var(--surface);
+    padding: 0.5rem;
+    box-shadow: var(--shadow);
+  }
+
+  .site-header__nav-link {
+    width: 100%;
+  }
+
+  .site-header__nav[hidden] {
+    display: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    scroll-behavior: auto;
+  }
+}
