@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="card success">
+
+    <h1>Question Paper Generated 🎉</h1>
+
+    <p>Your question paper is ready.</p>
+
+    <a href="{{ url_for('download_file', filename=file_name) }}">
+        <button>Download PDF</button>
+    </a>
+
+    <br><br>
+
+    <a href="{{ url_for('upload_pdf') }}">Generate Another</a>
+
+</div>
+
+{% endblock %}

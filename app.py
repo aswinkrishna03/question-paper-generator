@@ -1,34 +1,101 @@
-from flask import Flask, render_template, request
+from flask import Flask, render_template, request, redirect, url_for, send_from_directory, session
 from pypdf import PdfReader
 import os
 import re
 
 from classifier import classify_sentence
 from question_generator import generate_question
-from database import insert_question, clear_questions
+from database import (
+    insert_question,
+    clear_questions,
+    init_db,
+    create_user,
+    validate_user,
+    save_paper,
+    get_user_papers
+)
 from paper_generator import generate_question_paper
 from pdf_generator import generate_pdf
 
 app = Flask(__name__)
+app.secret_key = "super_secret_key_change_this"
+
+init_db()
 
 UPLOAD_FOLDER = "uploads"
+GENERATED_FOLDER = "generated_papers"
+
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+os.makedirs(GENERATED_FOLDER, exist_ok=True)
 
 
+# ===============================
+# LOGIN
+# ===============================
+@app.route("/login", methods=["GET", "POST"])
+def login():
+    if request.method == "POST":
+        username = request.form["username"]
+        password = request.form["password"]
+
+        user_id = validate_user(username, password)
+
+        if user_id:
+            session["user_id"] = user_id
+            session["username"] = username
+            return redirect(url_for("upload_pdf"))
+        else:
+            return "Invalid credentials"
+
+    return render_template("login.html")
+
+
+# ===============================
+# REGISTER
+# ===============================
+@app.route("/register", methods=["GET", "POST"])
+def register():
+    if request.method == "POST":
+        create_user(
+            request.form["username"],
+            request.form["password"]
+        )
+        return redirect(url_for("login"))
+
+    return render_template("register.html")
+
+
+# ===============================
+# LOGOUT
+# ===============================
+@app.route("/logout")
+def logout():
+    session.clear()
+    return redirect(url_for("login"))
+
+
+# ===============================
+# MAIN UPLOAD PAGE (PROTECTED)
+# ===============================
 @app.route("/", methods=["GET", "POST"])
 def upload_pdf():
+
+    if "user_id" not in session:
+        return redirect(url_for("login"))
+
     if request.method == "POST":
 
-        # 🔁 Clear old questions
         clear_questions()
         seen_topics = set()
 
-        # 📥 Save uploaded PDF
         pdf_file = request.files["pdf"]
+
+        if pdf_file.filename == "":
+            return "No file selected"
+
         file_path = os.path.join(UPLOAD_FOLDER, pdf_file.filename)
         pdf_file.save(file_path)
 
-        # 📄 Extract text from PDF
         reader = PdfReader(file_path)
         text = ""
 
@@ -37,15 +104,12 @@ def upload_pdf():
             if extracted:
                 text += extracted + "\n"
 
-        # 🧹 Clean extracted text
         text = text.replace("\n", " ")
         text = re.sub(r"[■•–]", " ", text)
         text = re.sub(r"\([^)]*\)", " ", text)
         text = re.sub(r"\s+", " ", text).strip()
 
-        # ✂ Split into sentences
         lines = re.split(r"[.:]", text)
-
         count = 0
 
         for line in lines:
@@ -59,62 +123,22 @@ def upload_pdf():
                 topic = topic.strip()
                 topic_lower = topic.lower()
 
-                # ==============================
-                # 🚫 FILTER UNWANTED TEXT
-                # ==============================
-
                 if len(topic) < 6:
                     continue
 
-                # Course codes (MCN201, etc.)
                 if re.search(r"[A-Z]{3,}\d{2,}", topic):
                     continue
 
-                # Full uppercase headings
                 if topic.isupper():
                     continue
 
-                # Instructional / prompt leakage
-                instruction_phrases = [
-                    "generate a question",
-                    "from this text",
-                    "its sources",
-                    "its uses",
-                    "its applications",
-                    "explain the following"
-                ]
-                if any(p in topic_lower for p in instruction_phrases):
-                    continue
-
-                # Repeated page headers
-                if "sun is the primary source" in topic_lower:
-                    continue
-
-                # Duplicate topic protection
                 if topic_lower in seen_topics:
                     continue
                 seen_topics.add(topic_lower)
 
-                # Repeated-word noise
-                words = topic.split()
-                if len(words) > 3 and len(set(words)) < len(words) / 2:
-                    continue
-
-                # Meaningless generic words
                 if topic_lower in ["resources", "engineering", "syllabus"]:
                     continue
 
-                # ==============================
-                # NORMALIZE COMMON TERMS
-                # ==============================
-                if "dma" in topic_lower:
-                    topic = "DMA transfer"
-                elif "control bus" in topic_lower:
-                    topic = "Control bus"
-
-                # ==============================
-                # GENERATE QUESTION
-                # ==============================
                 q_type = classify_sentence(topic)
                 question = generate_question(topic, q_type)
 
@@ -128,13 +152,53 @@ def upload_pdf():
             if count >= 10:
                 break
 
-        # 📑 Generate Question Paper & PDF
         paper = generate_question_paper()
         filepath = generate_pdf(paper)
 
-        return f"Question Paper Generated Successfully: {filepath}"
+        filename = os.path.basename(filepath)
 
-    return render_template("upload.html")
+        # SAVE PAPER TO USER HISTORY
+        save_paper(session["user_id"], filename)
+
+        return redirect(url_for("result", file=filename))
+
+    return render_template("upload.html", username=session["username"])
+
+
+# ===============================
+# RESULT PAGE
+# ===============================
+@app.route("/result")
+def result():
+    if "user_id" not in session:
+        return redirect(url_for("login"))
+
+    file_name = request.args.get("file")
+    return render_template("result.html", file_name=file_name)
+
+
+# ===============================
+# DOWNLOAD
+# ===============================
+@app.route("/download/<filename>")
+def download_file(filename):
+    return send_from_directory(
+        directory=GENERATED_FOLDER,
+        path=filename,
+        as_attachment=True
+    )
+
+
+# ===============================
+# HISTORY PAGE
+# ===============================
+@app.route("/history")
+def history():
+    if "user_id" not in session:
+        return redirect(url_for("login"))
+
+    papers = get_user_papers(session["user_id"])
+    return render_template("history.html", papers=papers)
 
 
 if __name__ == "__main__":

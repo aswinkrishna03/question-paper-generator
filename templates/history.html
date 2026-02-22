@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="card">
+    <h1>Your Generated Papers</h1>
+
+    {% if papers %}
+        <ul>
+        {% for file, date in papers %}
+            <li style="margin-bottom: 15px;">
+                <strong>{{ file }}</strong><br>
+                Generated on: {{ date }}<br><br>
+
+                <a href="{{ url_for('download_file', filename=file) }}">
+                    <button class="primary-btn">Download</button>
+                </a>
+            </li>
+        {% endfor %}
+        </ul>
+    {% else %}
+        <p>No papers generated yet.</p>
+    {% endif %}
+</div>
+{% endblock %}
