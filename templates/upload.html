@@ -2,29 +2,90 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Upload a syllabus PDF and generate an AI-powered question paper.">
     <title>AI Question Paper Generator</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}">
 </head>
-<body>
+<body class="page">
+    <a class="page__skip-link" href="#main-content">Skip to main content</a>
 
-    <h2>AI-Based Question Paper Generator</h2>
+    <header class="site-header" role="banner">
+        <div class="site-header__container">
+            <a class="site-header__brand" href="/" aria-label="Go to dashboard home">
+                AI Question Paper Generator
+            </a>
 
-    <!-- IMPORTANT: action="/" and enctype are REQUIRED -->
-    <form action="/" method="post" enctype="multipart/form-data">
+            <button
+                class="site-header__menu-toggle"
+                type="button"
+                aria-expanded="false"
+                aria-controls="primary-navigation"
+                aria-label="Open navigation menu"
+            >
+                <span class="site-header__menu-icon" aria-hidden="true"></span>
+                <span class="site-header__menu-icon" aria-hidden="true"></span>
+                <span class="site-header__menu-icon" aria-hidden="true"></span>
+            </button>
 
-        <label>Select Syllabus PDF:</label><br><br>
+            <nav class="site-header__nav" id="primary-navigation" aria-label="Primary" hidden>
+                <a class="site-header__nav-link" href="#upload-panel">Upload</a>
+                <a class="site-header__nav-link" href="#guide-panel">How it works</a>
+                <a class="site-header__nav-link" href="#tips-panel">Accessibility tips</a>
+            </nav>
+        </div>
+    </header>
 
-        <input type="file" name="pdf" accept=".pdf" required>
-        <br><br>
+    <main class="dashboard" id="main-content" tabindex="-1">
+        <section class="dashboard__panel" id="upload-panel" aria-labelledby="upload-panel-title">
+            <header class="dashboard__panel-header">
+                <h1 class="dashboard__title" id="upload-panel-title">Generate a Question Paper</h1>
+                <p class="dashboard__intro" id="upload-panel-description">
+                    Upload a <strong>text-based syllabus PDF</strong>. The system extracts topics and prepares
+                    exam-ready questions automatically.
+                </p>
+            </header>
 
-        <button type="submit">Generate Question Paper</button>
-    </form>
+            <form class="upload-form" action="/" method="post" enctype="multipart/form-data" aria-describedby="upload-panel-description">
+                <div class="upload-form__field">
+                    <label class="upload-form__label" for="pdf">Syllabus PDF</label>
+                    <input
+                        class="upload-form__input"
+                        id="pdf"
+                        type="file"
+                        name="pdf"
+                        accept=".pdf,application/pdf"
+                        required
+                        aria-describedby="pdf-help"
+                    >
+                    <p class="upload-form__help" id="pdf-help">
+                        Accepted format: PDF. Make sure the file contains selectable text for best results.
+                    </p>
+                </div>
 
-    <hr>
+                <button class="upload-form__button" type="submit">Generate Question Paper</button>
+            </form>
+        </section>
 
-    <p>
-        Upload a <strong>text-based syllabus PDF</strong>.  
-        The system will analyze the syllabus and automatically generate a question paper.
-    </p>
+        <section class="dashboard__panel dashboard__panel--muted" id="guide-panel" aria-labelledby="guide-panel-title">
+            <h2 class="dashboard__subtitle" id="guide-panel-title">How it works</h2>
+            <ol class="dashboard__steps">
+                <li class="dashboard__step">Upload your syllabus PDF.</li>
+                <li class="dashboard__step">Topics are extracted and filtered for relevance.</li>
+                <li class="dashboard__step">AI-generated questions are compiled into a printable paper.</li>
+            </ol>
+        </section>
 
+        <section class="dashboard__panel" id="tips-panel" aria-labelledby="tips-panel-title">
+            <h2 class="dashboard__subtitle" id="tips-panel-title">Accessibility tips</h2>
+            <ul class="dashboard__tips" role="list">
+                <li class="dashboard__tip">Use the “Skip to main content” link to jump directly to the form.</li>
+                <li class="dashboard__tip">All controls are keyboard accessible and show clear focus indicators.</li>
+                <li class="dashboard__tip">On mobile, use the menu button to open or close navigation links.</li>
+            </ul>
+        </section>
+    </main>
+
+    <script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
 </body>
 </html>
