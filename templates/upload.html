@@ -1,30 +1,90 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>AI Question Paper Generator</title>
-</head>
-<body>
+{% extends "base.html" %}
 
-    <h2>AI-Based Question Paper Generator</h2>
+{% block content %}
 
-    <!-- IMPORTANT: action="/" and enctype are REQUIRED -->
-    <form action="/" method="post" enctype="multipart/form-data">
+<!-- HERO SECTION -->
+<section class="hero">
+    <div class="hero-content">
+        <h1>AI-Powered Question Paper Generator</h1>
+        <p>
+            Automatically generate exam-ready question papers from syllabus PDFs
+            using advanced Natural Language Processing and Machine Learning.
+        </p>
+        <a href="#upload-section">
+            <button class="primary-btn">Generate Now</button>
+        </a>
+    </div>
+</section>
 
-        <label>Select Syllabus PDF:</label><br><br>
-
-        <input type="file" name="pdf" accept=".pdf" required>
-        <br><br>
-
-        <button type="submit">Generate Question Paper</button>
-    </form>
-
-    <hr>
-
+<!-- ABOUT SECTION -->
+<section class="section">
+    <h2>About the Platform</h2>
     <p>
-        Upload a <strong>text-based syllabus PDF</strong>.  
-        The system will analyze the syllabus and automatically generate a question paper.
+        The AI Question Paper Generator is designed to help educators,
+        institutions, and students create structured examination papers
+        instantly. By analyzing syllabus content, extracting key topics,
+        and classifying them intelligently, our system generates balanced
+        and relevant questions automatically.
     </p>
+</section>
 
-</body>
-</html>
+<!-- FEATURES SECTION -->
+<section class="section light">
+    <h2>Core Features</h2>
+    <div class="grid">
+        <div class="feature-card">
+            <h3>Smart Topic Extraction</h3>
+            <p>Extracts meaningful academic concepts from structured PDF syllabus documents.</p>
+        </div>
+
+        <div class="feature-card">
+            <h3>AI Question Generation</h3>
+            <p>Uses transformer-based NLP models to generate definition and descriptive questions.</p>
+        </div>
+
+        <div class="feature-card">
+            <h3>Automatic Mark Allocation</h3>
+            <p>Classifies questions and assigns appropriate marks automatically.</p>
+        </div>
+
+        <div class="feature-card">
+            <h3>Instant PDF Export</h3>
+            <p>Generates a formatted downloadable question paper in PDF format.</p>
+        </div>
+    </div>
+</section>
+
+<!-- HOW IT WORKS -->
+<section class="section">
+    <h2>How It Works</h2>
+    <ol class="steps">
+        <li>Upload a text-based syllabus PDF.</li>
+        <li>The system extracts and filters academic topics.</li>
+        <li>AI model generates structured questions.</li>
+        <li>Questions are compiled into a formatted question paper.</li>
+        <li>Download your ready-to-use PDF instantly.</li>
+    </ol>
+</section>
+
+<!-- TECHNOLOGY SECTION -->
+<section class="section light">
+    <h2>Technology Stack</h2>
+    <p>
+        Built using Flask (Python), NLP Transformers (T5 Model),
+        PDF processing libraries, and structured database handling.
+        The system combines backend intelligence with a clean,
+        responsive frontend interface.
+    </p>
+</section>
+
+<!-- UPLOAD SECTION -->
+<section id="upload-section" class="section upload-area">
+    <h2>Generate Your Question Paper</h2>
+
+    <form action="/" method="post" enctype="multipart/form-data" class="upload-form">
+        <input type="file" name="pdf" accept=".pdf" required>
+        <button type="submit" class="primary-btn">Generate Question Paper</button>
+    </form>
+</section>
+
+{% endblock %}

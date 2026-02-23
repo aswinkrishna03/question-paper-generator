@@ -3,7 +3,6 @@ from pypdf import PdfReader
 import os
 import re
 
-from classifier import classify_sentence
 from question_generator import generate_question
 from database import insert_question, clear_questions
 from paper_generator import generate_question_paper
@@ -19,124 +18,63 @@ os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 def upload_pdf():
     if request.method == "POST":
 
-        # 🔁 Clear old questions
         clear_questions()
-        seen_topics = set()
 
-        # 📥 Save uploaded PDF
         pdf_file = request.files["pdf"]
         file_path = os.path.join(UPLOAD_FOLDER, pdf_file.filename)
         pdf_file.save(file_path)
 
-        # 📄 Extract text from PDF
         reader = PdfReader(file_path)
-        text = ""
+        full_text = ""
 
+        # Extract text
         for page in reader.pages:
             extracted = page.extract_text()
             if extracted:
-                text += extracted + "\n"
+                full_text += extracted + " "
 
-        # 🧹 Clean extracted text
-        text = text.replace("\n", " ")
-        text = re.sub(r"[■•–]", " ", text)
-        text = re.sub(r"\([^)]*\)", " ", text)
-        text = re.sub(r"\s+", " ", text).strip()
+        # Basic cleaning
+        full_text = re.sub(r'http\S+|www\.\S+|\S+\.(com|in|org|net)', ' ', full_text)
+        full_text = re.sub(r'\b[A-Z]{2,}\d{2,}\b', ' ', full_text)
+        full_text = re.sub(r'\s+', ' ', full_text).strip()
 
-        # ✂ Split into sentences
-        lines = re.split(r"[.:]", text)
+        # 🔥 Split into sentences
+        sentences = re.split(r'(?<=[.!?]) +', full_text)
 
+        stored_questions = set()
         count = 0
 
-        for line in lines:
-            line = line.strip()
-            if len(line) < 6:
+        # 🔥 Group every 3 sentences into one paragraph
+        for i in range(0, len(sentences), 3):
+
+            paragraph = " ".join(sentences[i:i+3]).strip()
+
+            if len(paragraph.split()) < 25:
                 continue
 
-            topics = re.split(r"-| and |,", line)
+            question = generate_question(paragraph, "general")
 
-            for topic in topics:
-                topic = topic.strip()
-                topic_lower = topic.lower()
+            if not question:
+                continue
 
-                # ==============================
-                # 🚫 FILTER UNWANTED TEXT
-                # ==============================
+            if question in stored_questions:
+                continue
 
-                if len(topic) < 6:
-                    continue
+            insert_question(question, "general", 5)
+            stored_questions.add(question)
 
-                # Course codes (MCN201, etc.)
-                if re.search(r"[A-Z]{3,}\d{2,}", topic):
-                    continue
+            count += 1
 
-                # Full uppercase headings
-                if topic.isupper():
-                    continue
-
-                # Instructional / prompt leakage
-                instruction_phrases = [
-                    "generate a question",
-                    "from this text",
-                    "its sources",
-                    "its uses",
-                    "its applications",
-                    "explain the following"
-                ]
-                if any(p in topic_lower for p in instruction_phrases):
-                    continue
-
-                # Repeated page headers
-                if "sun is the primary source" in topic_lower:
-                    continue
-
-                # Duplicate topic protection
-                if topic_lower in seen_topics:
-                    continue
-                seen_topics.add(topic_lower)
-
-                # Repeated-word noise
-                words = topic.split()
-                if len(words) > 3 and len(set(words)) < len(words) / 2:
-                    continue
-
-                # Meaningless generic words
-                if topic_lower in ["resources", "engineering", "syllabus"]:
-                    continue
-
-                # ==============================
-                # NORMALIZE COMMON TERMS
-                # ==============================
-                if "dma" in topic_lower:
-                    topic = "DMA transfer"
-                elif "control bus" in topic_lower:
-                    topic = "Control bus"
-
-                # ==============================
-                # GENERATE QUESTION
-                # ==============================
-                q_type = classify_sentence(topic)
-                question = generate_question(topic, q_type)
-
-                marks = 2 if q_type == "definition" else 5
-                insert_question(question, q_type, marks)
-
-                count += 1
-                if count >= 10:
-                    break
-
-            if count >= 10:
+            if count >= 5:
                 break
 
-        # 📑 Generate Question Paper & PDF
         paper = generate_question_paper()
         filepath = generate_pdf(paper)
 
-        return f"Question Paper Generated Successfully: {filepath}"
+        return f"Question Paper Generated Successfully. Saved at: {filepath}"
 
     return render_template("upload.html")
 
 
 if __name__ == "__main__":
-    print("Starting Flask server...")
     app.run(debug=True)

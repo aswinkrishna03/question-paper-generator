@@ -1,5 +1,6 @@
 from reportlab.lib.pagesizes import A4
 from reportlab.pdfgen import canvas
+from reportlab.lib.utils import simpleSplit
 import time
 import os
 
@@ -12,15 +13,24 @@ def generate_pdf(paper):
 
     c = canvas.Canvas(filepath, pagesize=A4)
     width, height = A4
+
+    left_margin = 50
+    right_margin = 50
+    max_width = width - left_margin - right_margin
     y = height - 50
 
     for line in paper:
-        c.drawString(50, y, line)
-        y -= 20
+        wrapped_lines = simpleSplit(line, "Helvetica", 12, max_width)
 
-        if y < 50:
-            c.showPage()
-            y = height - 50
+        for wrap_line in wrapped_lines:
+            if y < 50:
+                c.showPage()
+                y = height - 50
+
+            c.drawString(left_margin, y, wrap_line)
+            y -= 18
+
+        y -= 5  # spacing between questions
 
     c.save()
     return filepath
