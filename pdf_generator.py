@@ -20,6 +20,13 @@ def generate_pdf(paper):
     y = height - 50
 
     for line in paper:
+
+        # Bold for section titles
+        if "SECTION" in line or "AI QUESTION PAPER" in line:
+            c.setFont("Helvetica-Bold", 14)
+        else:
+            c.setFont("Helvetica", 12)
+
         wrapped_lines = simpleSplit(line, "Helvetica", 12, max_width)
 
         for wrap_line in wrapped_lines:
@@ -30,7 +37,7 @@ def generate_pdf(paper):
             c.drawString(left_margin, y, wrap_line)
             y -= 18
 
-        y -= 5  # spacing between questions
+        y -= 5
 
     c.save()
     return filepath

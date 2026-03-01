@@ -1,94 +1,64 @@
-from transformers import T5Tokenizer, T5ForConditionalGeneration
-import torch
 import re
-
-tokenizer = None
-model = None
-device = None
+import random
 
 
-def load_model():
-    global tokenizer, model, device
+def extract_concept(paragraph):
+    """
+    Extract meaningful concept from paragraph.
+    """
 
-    if tokenizer is None:
-        print("Loading model...")
+    # Remove unwanted patterns
+    paragraph = re.sub(r'\b(module|unit|chapter|figure|diagram)\b', '', paragraph, flags=re.IGNORECASE)
 
-        tokenizer = T5Tokenizer.from_pretrained(
-            "mrm8488/t5-base-finetuned-question-generation-ap"
-        )
+    words = paragraph.split()
 
-        model = T5ForConditionalGeneration.from_pretrained(
-            "mrm8488/t5-base-finetuned-question-generation-ap"
-        )
+    # Take first meaningful 3–5 words
+    concept = " ".join(words[:5])
 
-        device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-        model.to(device)
-        model.eval()
+    concept = concept.strip(" ,.-")
 
-        print("Model loaded.")
+    return concept
 
 
-def clean_output(question):
-    question = question.strip()
-    question = re.sub(r"\s+", " ", question)
+def generate_short_question(concept):
+    """
+    3-mark questions (definition-level)
+    """
 
-    if not question.endswith("?"):
-        question = question.rstrip(".") + "?"
-
-    return question
-
-
-def is_weak_question(question):
-    weak_patterns = [
-        "what is shown",
-        "what is an example",
-        "what other",
-        "what does",
-        "what is the benefit",
-        "what can be addressed",
-        "where can",
+    templates = [
+        f"What is {concept}?",
+        f"Define {concept}.",
+        f"List the types of {concept}.",
+        f"Give examples of {concept}."
     ]
 
-    q = question.lower()
-    return any(pattern in q for pattern in weak_patterns)
+    return random.choice(templates)
+
+
+def generate_long_question(concept):
+    """
+    10-mark analytical questions
+    """
+
+    templates = [
+        f"Explain the concept of {concept} in detail.",
+        f"Discuss the advantages and limitations of {concept}.",
+        f"Analyse the impact of {concept} on environmental sustainability.",
+        f"Evaluate the applications of {concept} in modern industrial systems."
+    ]
+
+    return random.choice(templates)
 
 
 def generate_question(paragraph, q_type):
 
-    load_model()
+    if len(paragraph.split()) < 20:
+        return None
 
-    paragraph = paragraph.strip()
+    concept = extract_concept(paragraph)
 
-    # Limit long paragraphs
-    if len(paragraph.split()) > 150:
-        paragraph = " ".join(paragraph.split()[:150])
+    if not concept or len(concept.split()) < 2:
+        return None
 
-    input_text = f"context: {paragraph}"
-
-    input_ids = tokenizer.encode(
-        input_text,
-        return_tensors="pt",
-        max_length=512,
-        truncation=True
-    ).to(device)
-
-    output = model.generate(
-        input_ids,
-        max_length=64,
-        num_beams=4,
-        early_stopping=True,
-        no_repeat_ngram_size=2
-    )
-
-    question = tokenizer.decode(output[0], skip_special_tokens=True)
-    question = clean_output(question)
-
-    # 🔥 Instead of rejecting weak question, REWRITE it
-    if is_weak_question(question):
-        return "Explain the key concepts discussed in the paragraph."
-
-    # Fallback if too short
-    if len(question.split()) < 6:
-        return "Discuss the important concepts described in the paragraph."
-
-    return question
+    # Return both types — marks decided in app.py
+    return concept
