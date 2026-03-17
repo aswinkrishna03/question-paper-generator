@@ -128,3 +128,11 @@ Automatic PDF generation
 
 GitHub-ready project structure
 
+Markdown-first PDF parsing (noise reduction)
+
+The app now supports a markdown-first PDF extraction path before concept extraction.
+
+- Default mode (`PDF_PARSER=auto`): tries Docling markdown export, then Marker markdown, then falls back to PyPDF.
+- Force a parser with `PDF_PARSER=docling`, `PDF_PARSER=marker`, or `PDF_PARSER=pypdf`.
+- If Docling or Marker is not installed, the app automatically falls back to PyPDF.
+

@@ -4,17 +4,25 @@
 
 <div class="card success">
 
-    <h1>Question Paper Generated 🎉</h1>
-
+    <h1>Question Paper Generated</h1>
+    <p><strong>{{ paper_title }}</strong></p>
     <p>Your question paper is ready.</p>
 
     <a href="{{ url_for('download_file', filename=file_name) }}">
-        <button>Download PDF</button>
+        <button class="primary-btn">Download PDF</button>
     </a>
 
     <br><br>
 
-    <a href="{{ url_for('upload_pdf') }}">Generate Another</a>
+    <a href="{{ url_for('upload_pdf') }}">
+        <button class="secondary-btn">Generate Another</button>
+    </a>
+
+    <br><br>
+
+    <a href="{{ url_for('history') }}">
+        <button class="secondary-btn">View History</button>
+    </a>
 
 </div>
 

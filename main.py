@@ -1,7 +1,5 @@
-from paper_generator import generate_question_paper
-from pdf_generator import generate_pdf
+from app import app
 
-paper = generate_question_paper()
-generate_pdf(paper)
 
-print("Question paper PDF generated successfully.")
+if __name__ == "__main__":
+    app.run(debug=True)

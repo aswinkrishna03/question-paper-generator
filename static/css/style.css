@@ -39,6 +39,7 @@ body {
   text-decoration: none;
   font-weight: 500;
   transition: 0.3s ease;
+  margin-left: 18px;
 }
 
 .navbar a:hover {
@@ -146,6 +147,43 @@ body {
   max-width: 400px;
 }
 
+.upload-form input[type="text"],
+.card input[type="text"],
+.card input[type="password"] {
+  padding: 12px;
+  border-radius: 10px;
+  border: 1px solid #cbd5e1;
+  margin-bottom: 12px;
+  width: 100%;
+  max-width: 400px;
+  background: white;
+}
+
+.upload-form label {
+  display: block;
+  margin-bottom: 10px;
+}
+
+.upload-form select {
+  padding: 12px;
+  border-radius: 10px;
+  border: 1px solid #cbd5e1;
+  margin-bottom: 12px;
+  width: 100%;
+  max-width: 400px;
+  background: white;
+}
+
+#blooms_levels {
+  min-height: 150px;
+}
+
+.helper-text {
+  color: #475569;
+  font-size: 14px;
+  margin-bottom: 20px;
+}
+
 /* ============================= */
 /* PREMIUM BUTTON STYLES         */
 /* ============================= */
@@ -205,6 +243,21 @@ body {
 
 .card.success {
   border-left: 6px solid #22c55e;
+}
+
+.flash-container {
+  width: 90%;
+  max-width: 1100px;
+  margin: 24px auto 0;
+}
+
+.flash-message {
+  background: #dbeafe;
+  color: #1e3a8a;
+  border: 1px solid #bfdbfe;
+  border-radius: 10px;
+  padding: 10px 14px;
+  margin-bottom: 10px;
 }
 
 /* ============================= */

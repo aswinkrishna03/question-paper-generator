@@ -6,12 +6,15 @@
 
     {% if papers %}
         <ul>
-        {% for file, date in papers %}
+        {% for paper in papers %}
             <li style="margin-bottom: 15px;">
-                <strong>{{ file }}</strong><br>
-                Generated on: {{ date }}<br><br>
+                <strong>{{ paper["title"] }}</strong><br>
+                File: {{ paper["file_name"] }}<br>
+                Duration: {{ paper["duration_hours"] }} Hours<br>
+                Total Marks: {{ paper["total_marks"] }}<br>
+                Generated on: {{ paper["generated_at"] }}<br><br>
 
-                <a href="{{ url_for('download_file', filename=file) }}">
+                <a href="{{ url_for('download_file', filename=paper['file_name']) }}">
                     <button class="primary-btn">Download</button>
                 </a>
             </li>

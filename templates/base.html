@@ -11,31 +11,34 @@
 <header class="navbar">
     <div class="nav-container">
         <h2>AI Question Paper Generator</h2>
-
         <nav>
-            {% if session.get("username") %}
-                <span style="margin-right:15px;">
-                    Welcome, <strong>{{ session.get("username") }}</strong>
-                </span>
-
+            {% if session.get('examiner_id') %}
                 <a href="{{ url_for('upload_pdf') }}">Home</a>
-                <a href="{{ url_for('history') }}" style="margin-left:15px;">History</a>
-                <a href="{{ url_for('logout') }}" style="margin-left:15px;">Logout</a>
-
+                <a href="{{ url_for('history') }}">History</a>
+                <a href="{{ url_for('logout') }}">Logout</a>
             {% else %}
                 <a href="{{ url_for('login') }}">Login</a>
-                <a href="{{ url_for('register') }}" style="margin-left:15px;">Register</a>
+                <a href="{{ url_for('register') }}">Register</a>
             {% endif %}
         </nav>
     </div>
 </header>
 
 <main class="main-content">
+    {% with messages = get_flashed_messages() %}
+        {% if messages %}
+            <div class="flash-container">
+                {% for message in messages %}
+                    <div class="flash-message">{{ message }}</div>
+                {% endfor %}
+            </div>
+        {% endif %}
+    {% endwith %}
     {% block content %}{% endblock %}
 </main>
 
 <footer class="footer">
-    <p>© 2026 AI Question Paper Generator | Built with Flask</p>
+    <p>&copy; 2026 AI Question Paper Generator</p>
 </footer>
 
 </body>

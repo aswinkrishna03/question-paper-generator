@@ -1,43 +1,59 @@
+from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle
+from reportlab.lib.styles import getSampleStyleSheet
 from reportlab.lib.pagesizes import A4
-from reportlab.pdfgen import canvas
-from reportlab.lib.utils import simpleSplit
-import time
+from reportlab.lib import colors
 import os
+import time
+from xml.sax.saxutils import escape
 
-def generate_pdf(paper):
-    output_dir = "generated_papers"
-    os.makedirs(output_dir, exist_ok=True)
+
+def generate_pdf(lines):
+
+    os.makedirs("generated_papers", exist_ok=True)
 
     filename = f"Question_Paper_{int(time.time())}.pdf"
-    filepath = os.path.join(output_dir, filename)
+    filepath = os.path.join("generated_papers", filename)
 
-    c = canvas.Canvas(filepath, pagesize=A4)
-    width, height = A4
+    styles = getSampleStyleSheet()
+    doc = SimpleDocTemplate(filepath, pagesize=A4)
 
-    left_margin = 50
-    right_margin = 50
-    max_width = width - left_margin - right_margin
-    y = height - 50
+    elements = []
 
-    for line in paper:
+    for index, line in enumerate(lines):
+        if isinstance(line, dict) and line.get("type") == "header_meta":
+            meta_table = Table(
+                [[
+                    Paragraph(str(line.get("left", "")), styles["Normal"]),
+                    Paragraph(str(line.get("right", "")), styles["Normal"]),
+                ]],
+                colWidths=[doc.width / 2, doc.width / 2],
+            )
+            meta_table.setStyle(
+                TableStyle(
+                    [
+                        ("ALIGN", (0, 0), (0, 0), "LEFT"),
+                        ("ALIGN", (1, 0), (1, 0), "RIGHT"),
+                        ("VALIGN", (0, 0), (-1, -1), "MIDDLE"),
+                        ("LEFTPADDING", (0, 0), (-1, -1), 0),
+                        ("RIGHTPADDING", (0, 0), (-1, -1), 0),
+                        ("TOPPADDING", (0, 0), (-1, -1), 0),
+                        ("BOTTOMPADDING", (0, 0), (-1, -1), 0),
+                        ("LINEBELOW", (0, 0), (-1, 0), 0, colors.white),
+                    ]
+                )
+            )
+            elements.append(meta_table)
+            elements.append(Spacer(1, 10))
+            continue
 
-        # Bold for section titles
-        if "SECTION" in line or "AI QUESTION PAPER" in line:
-            c.setFont("Helvetica-Bold", 14)
-        else:
-            c.setFont("Helvetica", 12)
+        if index == 0:
+            elements.append(Paragraph(f"<b>{escape(str(line))}</b>", styles["Title"]))
+            elements.append(Spacer(1, 10))
+            continue
 
-        wrapped_lines = simpleSplit(line, "Helvetica", 12, max_width)
+        elements.append(Paragraph(escape(str(line)), styles["Normal"]))
+        elements.append(Spacer(1, 10))
 
-        for wrap_line in wrapped_lines:
-            if y < 50:
-                c.showPage()
-                y = height - 50
+    doc.build(elements)
 
-            c.drawString(left_margin, y, wrap_line)
-            y -= 18
-
-        y -= 5
-
-    c.save()
-    return filepath
+    return filename

@@ -58,7 +58,7 @@
 <section class="section">
     <h2>How It Works</h2>
     <ol class="steps">
-        <li>Upload a text-based syllabus PDF.</li>
+        <li>Upload one or more text-based module PDFs.</li>
         <li>The system extracts and filters academic topics.</li>
         <li>AI model generates structured questions.</li>
         <li>Questions are compiled into a formatted question paper.</li>
@@ -80,9 +80,38 @@
 <!-- UPLOAD SECTION -->
 <section id="upload-section" class="section upload-area">
     <h2>Generate Your Question Paper</h2>
+    <p class="helper-text">Logged in as examiner: <strong>{{ examiner_username }}</strong></p>
 
     <form action="/" method="post" enctype="multipart/form-data" class="upload-form">
-        <input type="file" name="pdf" accept=".pdf" required>
+        <label for="paper_title"><strong>Question Paper Title</strong></label>
+        <input id="paper_title" type="text" name="paper_title" value="AI GENERATED QUESTION PAPER" maxlength="120" required>
+        <p class="helper-text">This title will appear at the top of the generated question paper.</p>
+
+        <label for="pdfs"><strong>Upload Module PDFs</strong></label>
+        <input id="pdfs" type="file" name="pdfs" accept=".pdf" multiple required>
+        <p class="helper-text">Upload up to 5 PDFs (recommended: one PDF per module).</p>
+        <label for="paper_model"><strong>Question Paper Model</strong></label>
+        <select id="paper_model" name="paper_model">
+            <option value="50" selected>50 marks (6 x 3 marks + 2 x 16 marks)</option>
+            <option value="100">100 marks (10 x 3 marks + 5 x 14 marks)</option>
+        </select>
+        <p class="helper-text">For 100 marks model, upload exactly 5 module PDFs.</p>
+        <label for="blooms_levels"><strong>Select Bloom's Taxonomy Levels</strong></label>
+        <select id="blooms_levels" name="blooms_levels" multiple required>
+            <option value="Remember" selected>Remember</option>
+            <option value="Understand" selected>Understand</option>
+            <option value="Apply" selected>Apply</option>
+            <option value="Analyze" selected>Analyze</option>
+            <option value="Evaluate" selected>Evaluate</option>
+            <option value="Create" selected>Create</option>
+        </select>
+        <p class="helper-text">Hold Ctrl (Windows) or Command (Mac) to select multiple levels.</p>
+        <label for="blooms_distribution"><strong>Bloom Distribution Profile</strong></label>
+        <select id="blooms_distribution" name="blooms_distribution">
+            <option value="balanced" selected>Balanced</option>
+            <option value="foundational">Foundational (Lower-order heavy)</option>
+            <option value="advanced">Advanced (Higher-order heavy)</option>
+        </select>
         <button type="submit" class="primary-btn">Generate Question Paper</button>
     </form>
 </section>
